@@ -52,12 +52,14 @@ def download_subtitles(url, file_path="captions"):
     else:
         srt_captions = None
         print("Sorry, no english subtitles in this video.")
+    # to fix the KeyError : 'start', please read this:
+    # https://stackoverflow.com/questions/68780808/xml-to-srt-conversion-not-working-after-installing-pytube
 
     if srt_captions:
         with open(f"{file_path}.srt", "w") as srt_file:
             srt_file.writelines(srt_captions)
 
-        subs = pysrt.open(f"{file_path}.srt")
+        subs = pysrt.open(f"{file_path}.srt", encoding='unicode_escape')
 
         txt_captions = ""
         for sub in subs:
