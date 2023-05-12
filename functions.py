@@ -4,7 +4,7 @@ import pysrt
 
 
 def all_streams(url):
-    yt = YouTube(url)
+    yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
     # stream = yt.streams.filter(only_video=True)  # only video (without audio) streams
     # stream = yt.streams.filter(only_audio=True)  # only audio streams
     # stream = yt.streams.filter(progressive=True)  # only videos with audio streams
@@ -15,9 +15,9 @@ def all_streams(url):
 
 
 def download_yt_video(url, download_folder=None, itag=None):
-    yt = YouTube(url)
+    yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
     if itag:
-        video = yt.streams.get_by_itag(itag)
+        video = yt.streams.get_by_itag(itag, )
     else:
         video = yt.streams.get_highest_resolution()
     print(f"\nDownloading '{yt.title}' ...")
