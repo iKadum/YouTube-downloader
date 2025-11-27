@@ -1,5 +1,5 @@
 from functions import *
-from pytube.exceptions import RegexMatchError
+from pytubefix.exceptions import RegexMatchError
 
 FOLDER = "download"  # path to the folder where you want to download the files
 

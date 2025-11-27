@@ -1,21 +1,23 @@
-from pytube import YouTube
+from pytubefix import YouTube
+from pytubefix.cli import on_progress
 from moviepy.editor import VideoFileClip
 import pysrt
 
 
 def all_streams(url):
-    yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+    yt = YouTube(url, on_progress_callback=on_progress)
     # stream = yt.streams.filter(only_video=True)  # only video (without audio) streams
     # stream = yt.streams.filter(only_audio=True)  # only audio streams
     # stream = yt.streams.filter(progressive=True)  # only videos with audio streams
-    stream = yt.streams.all()  # all streams
+    # stream = yt.streams.all()  # all streams
+    stream = yt.streams  # all streams
 
     for i in stream:
         print(i)
 
 
 def download_yt_video(url, download_folder=None, itag=None):
-    yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+    yt = YouTube(url, on_progress_callback=on_progress)
     if itag:
         video = yt.streams.get_by_itag(itag, )
     else:
@@ -46,26 +48,30 @@ def download_subtitles(url, file_path="captions"):
     all_captions = yt.captions
 
     if "en" in all_captions:
-        srt_captions = yt.captions["en"].generate_srt_captions()
+        captions = yt.captions["en"]
     elif "a.en" in all_captions:
-        srt_captions = yt.captions["a.en"].generate_srt_captions()
+        captions = yt.captions["a.en"]
     else:
-        srt_captions = None
+        captions = None
         print("Sorry, no english subtitles in this video.")
     # to fix the KeyError : 'start', please read this:
     # https://stackoverflow.com/questions/68780808/xml-to-srt-conversion-not-working-after-installing-pytube
 
-    if srt_captions:
+    if captions:
+        # # save to txt file
+        # captions.save_captions(f"{file_path}.txt")
+
+        # save to srt file
+        srt_captions = captions.generate_srt_captions()
         with open(f"{file_path}.srt", "w") as srt_file:
             srt_file.writelines(srt_captions)
 
+        # convert srt to txt
         subs = pysrt.open(f"{file_path}.srt", encoding='unicode_escape')
-
         txt_captions = ""
         for sub in subs:
             txt_captions += f"{sub.text}\n\n"
-
-        with open(f"{file_path}.txt", "w") as srt_file:
-            srt_file.writelines(txt_captions)
+        with open(f"{file_path}.txt", "w") as txt_file:
+            txt_file.writelines(txt_captions)
 
         print("Subtitles download completed!")
