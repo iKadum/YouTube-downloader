@@ -10,21 +10,43 @@ def all_streams(url):
     # stream = yt.streams.filter(only_audio=True)  # only audio streams
     # stream = yt.streams.filter(progressive=True)  # only videos with audio streams
     # stream = yt.streams.all()  # all streams
-    stream = yt.streams  # all streams
+    streams = yt.streams  # all streams
 
-    for i in stream:
-        print(i)
+    for stream in streams:
+        # print(stream)
+        if stream.type == "audio":
+            stream.fps = "-"
+            stream.type = "audio only "
+            stream.resolution = "---"
+        else:
+            if stream.is_progressive:
+                stream.type = "video+audio"
+            else:
+                stream.type = "video only "
+
+        print(f"itag: {stream.itag} \t {stream.type} - {stream.mime_type} \t fps: {stream.fps} \t "
+              f"resolution: {stream.resolution} \t filesize: {stream.filesize / 1048576:.1f} MB")
+
+    print(15 * "-")
+    video_p = streams.get_highest_resolution()
+    print(f"Highest resolution with audio - itag: {video_p.itag}")
 
 
 def download_yt_video(url, download_folder=None, itag=None):
     yt = YouTube(url, on_progress_callback=on_progress)
+
     if itag:
         video = yt.streams.get_by_itag(itag, )
+        if video:  # if itag exists
+            print(f"\nDownloading video itag {itag}:")
+        else:  # if itag is wrong, no video
+            print("\nWrong itag, downloading highest resolution with audio:")
+            video = yt.streams.get_highest_resolution()
     else:
+        print("\nNo itag, downloading highest resolution with audio:")
         video = yt.streams.get_highest_resolution()
-    print(f"\nDownloading '{yt.title}' ...")
+    print(video.title)
     video.download(download_folder)
-    print("Stream download completed!")
     return video.default_filename  # returns the filename
 
 
@@ -54,8 +76,6 @@ def download_subtitles(url, file_path="captions"):
     else:
         captions = None
         print("Sorry, no english subtitles in this video.")
-    # to fix the KeyError : 'start', please read this:
-    # https://stackoverflow.com/questions/68780808/xml-to-srt-conversion-not-working-after-installing-pytube
 
     if captions:
         # # save to txt file

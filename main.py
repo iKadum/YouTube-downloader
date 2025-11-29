@@ -12,17 +12,12 @@ while True:
     except RegexMatchError:
         print("You entered an invalid url. Check the url and try again!\n")
 
-streams = input("\nPress ENTER to download the best quality stream available (720p max),\n"
-                "or type 's' if you want to see a list of all available video streams: ")
-
-if streams == "s":
-    print("\nList of all streams:")
-    all_streams(link)
-    stream_itag = input("\nPlease enter the stream itag: ")
-else:
-    stream_itag = None
+print("\nAVAILABLE STREAMS:")
+all_streams(link)
+stream_itag = input("\nPlease enter the stream itag: ")
 
 filename = download_yt_video(link, FOLDER, stream_itag)  # run the download function and save the filename
+print("\nStream download completed!")
 filename_ = filename.split('.')[0]  # filename without extension
 download_subtitles(link, f"{FOLDER}/{filename_}")
 
