@@ -1,17 +1,37 @@
 from pytubefix import YouTube
 from pytubefix.cli import on_progress
 from moviepy.editor import VideoFileClip
+from pytubefix.exceptions import RegexMatchError
 import pysrt
 
+FOLDER = "download"  # path to the folder where you want to download the files
+yt = None  # YouTube object
 
-def all_streams(url):
-    yt = YouTube(url, on_progress_callback=on_progress)
+
+def get_yt():
+    global yt
+    while True:
+        link = input("Please enter the link of the Youtube video: ")
+        try:
+            yt = YouTube(link, on_progress_callback=on_progress)
+            print()
+            print(yt.title)  # check if the url is a valid YouTube url and print the title
+            print(f"by: {yt.author}")
+            print(15 * "-")
+            break
+        except RegexMatchError:
+            print("You entered an invalid url. Check the url and try again!\n")
+
+
+def all_streams():
+    global yt
     # stream = yt.streams.filter(only_video=True)  # only video (without audio) streams
     # stream = yt.streams.filter(only_audio=True)  # only audio streams
     # stream = yt.streams.filter(progressive=True)  # only videos with audio streams
     # stream = yt.streams.all()  # all streams
     streams = yt.streams  # all streams
 
+    print("AVAILABLE STREAMS:")
     for stream in streams:
         # print(stream)
         if stream.type == "audio":
@@ -32,8 +52,10 @@ def all_streams(url):
     print(f"Highest resolution with audio - itag: {video_p.itag}")
 
 
-def download_yt_video(url, download_folder=None, itag=None):
-    yt = YouTube(url, on_progress_callback=on_progress)
+def download_yt_video():
+    global yt
+
+    itag = input("\nPlease enter the stream itag: ")
 
     if itag:
         video = yt.streams.get_by_itag(itag, )
@@ -46,7 +68,8 @@ def download_yt_video(url, download_folder=None, itag=None):
         print("\nNo itag, downloading highest resolution with audio:")
         video = yt.streams.get_highest_resolution()
     print(video.title)
-    video.download(download_folder)
+    video.download(FOLDER)
+    print("Download completed!")
     return video.default_filename  # returns the filename
 
 
@@ -65,8 +88,8 @@ def convert_mp4_to_mp3(mp4_in, mp3_out):
         print("Sorry, video file does not exist, please try another stream.")
 
 
-def download_subtitles(url, file_path="captions"):
-    yt = YouTube(url)
+def download_subtitles(file_path="captions"):
+    global yt
     all_captions = yt.captions
 
     if "en" in all_captions:

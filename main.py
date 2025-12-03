@@ -1,25 +1,14 @@
 from functions import *
-from pytubefix.exceptions import RegexMatchError
-
-FOLDER = "download"  # path to the folder where you want to download the files
 
 
-while True:
-    link = input("Please enter the link of the Youtube video: ")
-    try:
-        YouTube(link)  # check if the url is a valid YouTube url
-        break
-    except RegexMatchError:
-        print("You entered an invalid url. Check the url and try again!\n")
+get_yt()
 
-print("\nAVAILABLE STREAMS:")
-all_streams(link)
-stream_itag = input("\nPlease enter the stream itag: ")
+all_streams()
 
-filename = download_yt_video(link, FOLDER, stream_itag)  # run the download function and save the filename
-print("\nStream download completed!")
+filename = download_yt_video()  # run the download function and save the filename
 filename_ = filename.split('.')[0]  # filename without extension
-download_subtitles(link, f"{FOLDER}/{filename_}")
+
+download_subtitles(f"{FOLDER}/{filename_}")
 
 mp3_ = input("\nDo you want to convert to mp3? (type 'y' convert): ")
 if mp3_ == "y":
