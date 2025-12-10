@@ -5,6 +5,8 @@ from pytubefix.exceptions import RegexMatchError
 import pysrt
 
 FOLDER = "download"  # path to the folder where you want to download the files
+RESERVED_CHARACTERS = '<>:"/\\|?*'
+
 yt = None  # YouTube object
 
 
@@ -76,9 +78,16 @@ def download_yt_video():
         print("\nNo itag, downloading highest resolution with audio:")
         video = yt.streams.get_highest_resolution()
     print(video.title)
-    video.download(FOLDER)
+    filename = video.default_filename
+    for char in filename:
+        if char in RESERVED_CHARACTERS:
+            filename = filename.replace(char, "")
+    print(filename)
+    video.download(output_path=FOLDER, filename=filename)
     print("Download completed!")
-    return video.default_filename  # returns the filename
+
+
+    return filename  # returns the filename
 
 
 def convert_mp4_to_mp3(mp4_in, mp3_out):
