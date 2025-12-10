@@ -18,6 +18,8 @@ def get_yt():
             print(yt.title)  # check if the url is a valid YouTube url and print the title
             print(f"by: {yt.author}")
             print(15 * "-")
+            print(yt.video_id)
+            # print(yt.__dict__.keys())
             break
         except RegexMatchError:
             print("You entered an invalid url. Check the url and try again!\n")
@@ -34,6 +36,12 @@ def all_streams():
     print("AVAILABLE STREAMS:")
     for stream in streams:
         # print(stream)
+        #  change video/mp4, video/webm, audio/mp4 and audio/webm to mp4 or webm
+        if "mp4" in stream.mime_type:
+            stream.mime_type = "mp4 "
+        else:
+            stream.mime_type = "webm"
+
         if stream.type == "audio":
             stream.fps = "-"
             stream.type = "audio only "
