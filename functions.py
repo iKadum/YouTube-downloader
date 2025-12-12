@@ -20,7 +20,7 @@ def get_yt():
             print(yt.title)  # check if the url is a valid YouTube url and print the title
             print(f"by: {yt.author}")
             print(15 * "-")
-            print(yt.video_id)
+            # print(yt.video_id)
             # print(yt.__dict__.keys())
             break
         except RegexMatchError:
@@ -68,7 +68,7 @@ def download_yt_video():
     itag = input("\nPlease enter the stream itag: ")
 
     if itag:
-        video = yt.streams.get_by_itag(itag, )
+        video = yt.streams.get_by_itag(itag)
         if video:  # if itag exists
             print(f"\nDownloading video itag {itag}:")
         else:  # if itag is wrong, no video
@@ -82,10 +82,9 @@ def download_yt_video():
     for char in filename:
         if char in RESERVED_CHARACTERS:
             filename = filename.replace(char, "")
-    print(filename)
+    # print(filename)
     video.download(output_path=FOLDER, filename=filename)
     print("Download completed!")
-
 
     return filename  # returns the filename
 
@@ -103,6 +102,8 @@ def convert_mp4_to_mp3(mp4_in, mp3_out):
 
     except OSError:
         print("Sorry, video file does not exist, please try another stream.")
+    except KeyError:
+        print("Sorry, this is an audio only file, please try another stream.")
 
 
 def download_subtitles(file_path="captions"):
