@@ -1,6 +1,6 @@
 from pytubefix import YouTube
 from pytubefix.cli import on_progress
-from moviepy.editor import VideoFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip
 from pytubefix.exceptions import RegexMatchError
 import pysrt
 
@@ -90,20 +90,19 @@ def download_yt_video():
 
 
 def convert_mp4_to_mp3(mp4_in, mp3_out):
+    audio = None
     try:
-        mp4 = VideoFileClip(mp4_in)
-        mp3 = mp4.audio
-        try:
-            mp3.write_audiofile(mp3_out)
-            mp3.close()
-        except AttributeError:
-            print("Sorry, no audio in this file, try another stream with audio.")
-        mp4.close()
-
+        audio = VideoFileClip(mp4_in).audio
+    except KeyError:  # audio only file, does not have fps
+        audio = AudioFileClip(mp4_in)
     except OSError:
-        print("Sorry, video file does not exist, please try another stream.")
-    except KeyError:
-        print("Sorry, this is an audio only file, please try another stream.")
+        print("Sorry, video file does not exist, please try again.")
+
+    if audio:
+        audio.write_audiofile(mp3_out)
+        audio.close()
+    else:
+        print("Sorry, no audio in this file, try another stream with audio.")
 
 
 def download_subtitles(file_path="captions"):
