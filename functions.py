@@ -1,5 +1,5 @@
 from pytubefix import YouTube
-from pytubefix.cli import on_progress
+# from pytubefix.cli import on_progress
 from moviepy.editor import VideoFileClip, AudioFileClip
 from pytubefix.exceptions import RegexMatchError
 import pysrt
@@ -7,15 +7,15 @@ import pysrt
 FOLDER = "download"  # path to the folder where you want to download the files
 RESERVED_CHARACTERS = '<>:"/\\|?*'
 
-yt = None  # YouTube object
+link = None  # YouTube object
 
 
 def get_yt():
-    global yt
+    global link
     while True:
         link = input("Please enter the link of the Youtube video: ")
         try:
-            yt = YouTube(link, on_progress_callback=on_progress)
+            yt = YouTube(link)
             print()
             print(yt.title)  # check if the url is a valid YouTube url and print the title
             print(f"by: {yt.author}")
@@ -28,14 +28,20 @@ def get_yt():
 
 
 def all_streams():
-    global yt
+    global link
+    yt = YouTube(link)
     # stream = yt.streams.filter(only_video=True)  # only video (without audio) streams
     # stream = yt.streams.filter(only_audio=True)  # only audio streams
     # stream = yt.streams.filter(progressive=True)  # only videos with audio streams
     # stream = yt.streams.all()  # all streams
-    streams = yt.streams  # all streams
+    streams = yt.streams  # reset stream attributes to defaults
+    audio = streams.get_audio_only()
+    audio_filename = audio.default_filename
+    video_p = streams.get_highest_resolution()
+    video_p_filename = video_p.default_filename
 
     print("AVAILABLE STREAMS:")
+    # this will change stream attributes
     for stream in streams:
         # print(stream)
         #  change video/mp4, video/webm, audio/mp4 and audio/webm to mp4 or webm
@@ -58,12 +64,13 @@ def all_streams():
               f"resolution: {stream.resolution} \t filesize: {stream.filesize / 1048576:.1f} MB")
 
     print(15 * "-")
-    video_p = streams.get_highest_resolution()
-    print(f"Highest resolution with audio - itag: {video_p.itag}")
+    print(f"Highest resolution with audio - itag: {video_p.itag}, filename: {video_p_filename}")
+    print(f"Highest resolution audio - itag: {audio.itag}, filename: {audio_filename}")
 
 
 def download_yt_video():
-    global yt
+    global link
+    yt = YouTube(link)
 
     itag = input("\nPlease enter the stream itag: ")
 
@@ -106,7 +113,8 @@ def convert_mp4_to_mp3(mp4_in, mp3_out):
 
 
 def download_subtitles(file_path="captions"):
-    global yt
+    global link
+    yt = YouTube(link)
     all_captions = yt.captions
 
     if "en" in all_captions:

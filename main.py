@@ -6,6 +6,7 @@ get_yt()
 all_streams()
 
 filename = download_yt_video()  # run the download function and save the filename
+print(filename)
 filename_ = filename.split('.')[0]  # filename without extension
 
 download_subtitles(f"{FOLDER}/{filename_}")
