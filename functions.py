@@ -96,50 +96,56 @@ def download_yt_video():
     return filename  # returns the filename
 
 
-def convert_mp4_to_mp3(mp4_in, mp3_out):
-    audio = None
-    try:
-        audio = VideoFileClip(mp4_in).audio
-    except KeyError:  # audio only file, does not have fps
-        audio = AudioFileClip(mp4_in)
-    except OSError:
-        print("Sorry, video file does not exist, please try again.")
+def convert_mp4_to_mp3(filename):
+    mp3_ = input("\nDo you want to convert to mp3? (type 'y' to convert): ")
+    if mp3_ == "y" or mp3_ == "Y":
+        try:
+            audio_file = AudioFileClip(f"{FOLDER}/{filename}")
+        except KeyError:  # audio only file, does not have fps
+            audio_file = AudioFileClip(f"{FOLDER}/{filename}")
+        except OSError:
+            audio_file = None
+            print("Sorry, video file does not exist, please try again.")
 
-    if audio:
-        audio.write_audiofile(mp3_out)
-        audio.close()
-    else:
-        print("Sorry, no audio in this file, try another stream with audio.")
+        if audio_file:
+            audio_file.write_audiofile(f"{FOLDER}/{filename[:-3]}mp3")
+            audio_file.close()
+        else:
+            print("Sorry, no audio in this file, try another stream with audio.")
 
 
-def download_subtitles(file_path="captions"):
-    global link
-    yt = YouTube(link)
-    all_captions = yt.captions
+def download_subtitles(filename):
+    sub_ = input("\nDo you want to download subtitles? (type 'y' to download): ")
+    if sub_ == "y" or sub_ == "Y":
+        global link
+        yt = YouTube(link)
+        all_captions = yt.captions
 
-    if "en" in all_captions:
-        captions = yt.captions["en"]
-    elif "a.en" in all_captions:
-        captions = yt.captions["a.en"]
-    else:
-        captions = None
-        print("Sorry, no english subtitles in this video.")
+        if "en" in all_captions:
+            captions = yt.captions["en"]
+        elif "a.en" in all_captions:
+            captions = yt.captions["a.en"]
+        else:
+            captions = None
+            print("Sorry, no english subtitles in this video.")
 
-    if captions:
-        # # save to txt file
-        # captions.save_captions(f"{file_path}.txt")
+        if captions:
+            # # save txt captions
+            # captions.save_captions(f"{FOLDER}/{filename[:-4]}_2.txt")
 
-        # save to srt file
-        srt_captions = captions.generate_srt_captions()
-        with open(f"{file_path}.srt", "w") as srt_file:
-            srt_file.writelines(srt_captions)
+            # save srt captions
+            srt_captions = captions.generate_srt_captions()
+            with open(f"{FOLDER}/{filename[:-3]}srt", "w") as srt_file:
+                srt_file.writelines(srt_captions)
 
-        # convert srt to txt
-        subs = pysrt.open(f"{file_path}.srt", encoding='unicode_escape')
-        txt_captions = ""
-        for sub in subs:
-            txt_captions += f"{sub.text}\n\n"
-        with open(f"{file_path}.txt", "w") as txt_file:
-            txt_file.writelines(txt_captions)
+            # convert srt to txt without timings (text only)
+            subs = pysrt.open(f"{FOLDER}/{filename[:-3]}srt", encoding='unicode_escape')
+            txt_captions = ""
+            # for sub in subs:
+            #     # txt_captions += f"{sub.text}\n\n"  # 1 row space between new lines
+            #     txt_captions += f"{sub.text} "  # no new lines
+            txt_captions = subs.text  # new lines
+            with open(f"{FOLDER}/{filename[:-3]}txt", "w") as txt_file:
+                txt_file.writelines(txt_captions)
 
-        print("Subtitles download completed!")
+            print("Subtitles download completed!")
