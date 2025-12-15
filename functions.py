@@ -1,6 +1,6 @@
 from pytubefix import YouTube
 # from pytubefix.cli import on_progress
-from moviepy.editor import VideoFileClip, AudioFileClip
+from moviepy import AudioFileClip  # , VideoFileClip
 from pytubefix.exceptions import RegexMatchError
 import pysrt
 
@@ -100,18 +100,24 @@ def convert_mp4_to_mp3(filename):
     mp3_ = input("\nDo you want to convert to mp3? (type 'y' to convert): ")
     if mp3_ == "y" or mp3_ == "Y":
         try:
-            audio_file = AudioFileClip(f"{FOLDER}/{filename}")
-        except KeyError:  # audio only file, does not have fps
-            audio_file = AudioFileClip(f"{FOLDER}/{filename}")
+            # audio_file = VideoFileClip(f"{FOLDER}/{filename}").audio
+            audio_file = AudioFileClip(f"{FOLDER}/{filename}")  # same, but raises no KeyError error if audio only
+
+        # except KeyError:  # audio only file, does not have fps
+        #     audio_file = AudioFileClip(f"{FOLDER}/{filename}")
+
         except OSError:
             audio_file = None
-            print("Sorry, video file does not exist, please try again.")
+            print("Sorry, file does not exist, please try again.")
 
         if audio_file:
-            audio_file.write_audiofile(f"{FOLDER}/{filename[:-3]}mp3")
-            audio_file.close()
+            try:
+                audio_file.write_audiofile(f"{FOLDER}/{filename[:-3]}mp3")
+                audio_file.close()
+            except:
+                print("Sorry, no audio in this file, try another stream with audio!")
         else:
-            print("Sorry, no audio in this file, try another stream with audio.")
+            print("Sorry, no audio in this file, try another stream with audio...")
 
 
 def download_subtitles(filename):
@@ -140,7 +146,7 @@ def download_subtitles(filename):
 
             # convert srt to txt without timings (text only)
             subs = pysrt.open(f"{FOLDER}/{filename[:-3]}srt", encoding='unicode_escape')
-            txt_captions = ""
+            # txt_captions = ""
             # for sub in subs:
             #     # txt_captions += f"{sub.text}\n\n"  # 1 row space between new lines
             #     txt_captions += f"{sub.text} "  # no new lines
